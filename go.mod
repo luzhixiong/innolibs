@@ -1,4 +1,4 @@
-module gitea.innolabs.cloud/server/innolabs
+module gitea.innolabs.cloud/server/innolibs
 
 go 1.21.3
 

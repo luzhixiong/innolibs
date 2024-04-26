@@ -54,3 +54,22 @@ func InArrayUint(needle uint, haystack []uint) bool {
 	}
 	return false
 }
+
+// 判斷
+func InArrayStruct(needle struct {
+	Key   string
+	Value int32
+	Sort  int
+}, haystack []struct {
+	Key   string
+	Value int32
+	Sort  int
+}) bool {
+	for _, item := range haystack {
+		if item.Key == needle.Key && item.Value == needle.Value && item.Sort == needle.Sort {
+			return true
+		}
+	}
+
+	return false
+}

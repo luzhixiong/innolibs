@@ -18,6 +18,23 @@ var (
 	earthRadius    = 6378.137
 	aa             = 6378245.0
 	ee             = 0.00669342162296594323
+
+	inChina = [][]float64{
+		{49.220400, 79.446200, 42.889900, 96.330000},
+		{54.141500, 109.687200, 39.374200, 135.000200},
+		{42.889900, 073.124600, 29.529700, 124.143255},
+		{29.529700, 082.968400, 26.718600, 097.035200},
+		{29.529700, 097.025300, 20.414096, 124.367395},
+		{20.414096, 107.975793, 17.871542, 111.744104},
+	}
+	outChina = [][]float64{
+		{25.398623, 119.921265, 21.785006, 122.497559},
+		{22.284000, 101.865200, 20.098800, 106.665000},
+		{21.542200, 106.452500, 20.487800, 108.051000},
+		{55.817500, 109.032300, 50.325700, 119.127000},
+		{55.817500, 127.456800, 49.557400, 137.022700},
+		{44.892200, 131.266200, 42.569200, 137.022700},
+	}
 )
 
 type GeocodeRes struct {
@@ -117,7 +134,7 @@ func CalcDistance(lat1, lng1, lat2, lng2 string) float64 {
 	return math.Round(math.Acos(cos) * earthRadius * 1000)
 }
 
-func ddmm2dd(point string) string {
+func Ddmm2dd(point string) string {
 	val, _ := strconv.ParseFloat(point, defaultBitSize)
 	val2 := val / 100
 	intVal := math.Floor(val2)
@@ -125,7 +142,7 @@ func ddmm2dd(point string) string {
 	return fmt.Sprintf("%f", ret)
 }
 
-func transformLat(lat, lng float64) float64 {
+func TransformLat(lat, lng float64) float64 {
 	ret := -100.0 + 2.0*lng + 3.0*lat + 0.2*lat*lat + 0.1*lng*lat + 0.2*math.Sqrt(math.Abs(lng))
 	ret += (20.0*math.Sin(6.0*lng*math.Pi) + 20.0*math.Sin(2.0*lng*math.Pi)) * 2.0 / 3.0
 	ret += (20.0*math.Sin(lat*math.Pi) + 40.0*math.Sin(lat/3.0*math.Pi)) * 2.0 / 3.0
@@ -133,7 +150,7 @@ func transformLat(lat, lng float64) float64 {
 	return ret
 }
 
-func transformLng(lat, lng float64) float64 {
+func TransformLng(lat, lng float64) float64 {
 	ret := 300.0 + lng + 2.0*lat + 0.1*lng*lng + 0.1*lng*lat + 0.1*math.Sqrt(math.Abs(lng))
 	ret += (20.0*math.Sin(6.0*lng*math.Pi) + 20.0*math.Sin(2.0*lng*math.Pi)) * 2.0 / 3.0
 	ret += (20.0*math.Sin(lng*math.Pi) + 40.0*math.Sin(lng/3.0*math.Pi)) * 2.0 / 3.0
@@ -142,11 +159,11 @@ func transformLng(lat, lng float64) float64 {
 }
 
 // 坐标偏移
-func wgs84ToGcj02(lat0, lng0 string) (string, string) {
+func Wgs84ToGcj02(lat0, lng0 string) (string, string) {
 	lat, _ := strconv.ParseFloat(lat0, defaultBitSize)
 	lng, _ := strconv.ParseFloat(lng0, defaultBitSize)
-	dlat := transformLat(lat-35.0, lng-105.0)
-	dlng := transformLng(lat-35.0, lng-105.0)
+	dlat := TransformLat(lat-35.0, lng-105.0)
+	dlng := TransformLng(lat-35.0, lng-105.0)
 	radlat := lat / 180.0 * math.Pi
 	magic := math.Sin(radlat)
 	magic = 1 - ee*magic*magic
@@ -160,8 +177,8 @@ func wgs84ToGcj02(lat0, lng0 string) (string, string) {
 
 // 坐标转换
 func CalcCoord(lat, lng string) (string, string) {
-	newLat := ddmm2dd(lat)
-	newLng := ddmm2dd(lng)
+	newLat := Ddmm2dd(lat)
+	newLng := Ddmm2dd(lng)
 
 	//todo 国内需要处理坐标偏移
 	//if global.GVA_CONFIG.AliyunAPI.IOT.Localization == "gcj02" { // 国内需要处理坐标偏移
@@ -337,4 +354,24 @@ func IsInGeoFence(point [2]float64, points [][2]float64) bool {
 	} else {
 		return true
 	}
+}
+
+func IsInChina(lat, lng string) bool {
+	latFloat, _ := strconv.ParseFloat(lat, 64)
+	lngFloat, _ := strconv.ParseFloat(lng, 64)
+	return IsInsideChina(latFloat, lngFloat)
+}
+
+func IsInsideChina(lat, lng float64) bool {
+	for i := 0; i < 6; i++ {
+		if lat <= inChina[i][0] && lat >= inChina[i][2] && lng >= inChina[i][1] && lng <= inChina[i][3] {
+			for j := 0; j < 6; j++ {
+				if lat <= outChina[j][0] && lat >= outChina[j][2] && lng >= outChina[j][1] && lng <= outChina[j][3] {
+					return false
+				}
+			}
+			return true
+		}
+	}
+	return false
 }

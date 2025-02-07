@@ -13,12 +13,12 @@ const (
 // 极光推送推送给单个用户
 func JPushSingleNotify(jpushKey, jpushSecret string, platform PlatformType, id, title, content string, largeUrl string, smallUrl string) (err error) {
 
-	if largeUrl == "" {
-		largeUrl = largeIcon
-	}
-	if smallUrl == "" {
-		smallUrl = smallIcon
-	}
+	//if largeUrl == "" {
+	//	largeUrl = largeIcon
+	//}
+	//if smallUrl == "" {
+	//	smallUrl = smallIcon
+	//}
 	cid := NewCidRequest(1, "")
 	cidList, err := cid.GetCidList(jpushKey, jpushSecret)
 	if err != nil {

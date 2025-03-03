@@ -373,6 +373,7 @@ func IsInsideChina(lat, lng float64) bool {
 			return true
 		}
 	}
+
 	return false
 }
 

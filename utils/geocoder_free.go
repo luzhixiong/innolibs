@@ -375,3 +375,12 @@ func IsInsideChina(lat, lng float64) bool {
 	}
 	return false
 }
+
+// dd.mmmm转dd.dddd
+func Ddmmmm2dd(point string) string {
+	val, _ := strconv.ParseFloat(point, defaultBitSize)
+	degrees := math.Floor(val)
+	minutes := val - degrees
+	degreesInDecimal := minutes / 60
+	return fmt.Sprintf("%f", degrees+degreesInDecimal)
+}
